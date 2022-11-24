@@ -38,6 +38,45 @@
     } else {
         echo "Error creating myTable: " . $conn->error;
     }
+    
+    $conn->close();
+    $conn = new mysqli($servername, $username, $password, 'myDB');
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $name = $_REQUEST['name'];
+        $surname = $_REQUEST['surname'];
+        $id = $_REQUEST['id'];
+        $date = $_REQUEST['date'];
+        $sql = "INSERT INTO myTable VALUES (
+            '$id', '$name', '$surname', '$date'
+            )";
+        echo $sql;
+        if ($conn->query($sql) === TRUE) {
+            echo "Record entered successfully";
+        } else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+        
+    }
+    ?>
+    <h1>DEVPROX Assessment</h1>
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) ?>" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" name="name">
+        <br>
+        <label for="surname">Surname:</label>
+        <input type="text" name="surname">
+        <br>
+        <label for="id">ID:</label>
+        <input type="text" name="id">
+        <br>
+        <label for="date">Date of Birth:</label>
+        <input type="date" name="date" placeholder="dd/mm/yyyy" min="1921-01-01" max="2021-12-31">
+        <br>
+        <button type="submit">Submit</button>
+        <button type="reset">Cancel</button>
+    </form>
+    <?php
 
     $conn->close();
 
