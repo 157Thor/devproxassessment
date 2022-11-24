@@ -59,6 +59,10 @@
                 )";
             if ($conn->query($sql) === TRUE) {
                 echo "Record entered successfully";
+                $name = '';
+                $surname = '';
+                $id = '';
+                $date = '';
             } else {
                 echo "Error: " . $sql . "<br>" . $conn->error;
             }
@@ -104,13 +108,13 @@
             var name = $("#name").val();
             var surname = $("#surname").val();
             var flag = true;
-            if (!isNaN(name)) {
+            if (!name.match("^[A-Za-z]{1,30}$")) {
                 $("#name-error").text("Name is invalid!")
                 flag = false;
             } else {
                 $("#name-error").empty();
             }
-            if (!isNaN(surname)) {
+            if (!surname.match("^[A-Za-z]{1,30}$")) {
                 $("#surname-error").text("Surname is invalid!")
                 flag = false;
             } else {
