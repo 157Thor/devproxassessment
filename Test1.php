@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>DEVPROX Assessment</title>
+    <title>DEVPROX Assessment Test 1</title>
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
@@ -70,7 +70,7 @@
     }
     $conn->close();
     ?>
-    <h1>DEVPROX Assessment</h1>
+    <h1>DEVPROX Assessment Test 1</h1>
     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) ?>" method="POST" onsubmit="return validateForm()">
         <label for="name">Name:</label>
         <input type="text" name="name" id="name" value="<?php echo $name ?>">
