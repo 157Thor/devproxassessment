@@ -22,12 +22,12 @@
     }
 
     // Create database
-    $sql = "CREATE DATABASE IF NOT EXISTS myDB";
+    $sql = "CREATE DATABASE IF NOT EXISTS test1DB";
     if ($conn->query($sql) !== TRUE) {
         echo "Error creating database: " . $conn->error;
     }
 
-    $sql = "CREATE TABLE IF NOT EXISTS myDB.myTable (
+    $sql = "CREATE TABLE IF NOT EXISTS test1DB.myTable (
         id VARCHAR(13) PRIMARY KEY,
         name VARCHAR(30) NOT NULL,
         surname VARCHAR(30) NOT NULL,
@@ -39,7 +39,7 @@
     }
 
     $conn->close();
-    $conn = new mysqli($servername, $username, $password, 'myDB');
+    $conn = new mysqli($servername, $username, $password, 'test1DB');
     $name = "";
     $surname = "";
     $id = "";
