@@ -23,7 +23,8 @@ $sql = "CREATE TABLE IF NOT EXISTS test2DB.csv_import (
     surname VARCHAR(255) NOT NULL,
     initials CHAR(1) NOT NULL,
     age TINYINT(3) UNSIGNED NOT NULL,
-    date_of_birth DATE NOT NULL
+    date_of_birth DATE NOT NULL,
+    UNIQUE (name, surname, date_of_birth)
 )";
 
 if ($conn->query($sql) !== TRUE) {
@@ -77,8 +78,8 @@ $surnames = array(
     'Drews',
 );
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $num_rows = $_REQUEST['rows'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'generate') {
+    $num_rows = $_POST['rows'];
     $i = 1;
     $today = new DateTime();
     $date = new DateTime();
@@ -143,12 +144,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             fputcsv($f, $temp);
             $i++;
         }
-
     }
     fseek($f, 0);
     fpassthru($f);
     fclose($f);
     return;
+}
+if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'upload') {
+
 }
 ?>
 <!DOCTYPE html>
@@ -163,6 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) ?>" method="post">
         <label for="rows">Enter the number of records to generate: </label>
         <input type="number" name="rows" id="rows">
+        <input type="hidden" name="action" value="generate">
         <br>
         <button type="submit">Submit</button>
         <button type="reset">Cancel</button>
