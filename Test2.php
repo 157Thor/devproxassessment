@@ -1,4 +1,6 @@
 <?php
+ini_set("memory_limit", "1024M");
+
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -75,82 +77,73 @@ $surnames = array(
     'Drews',
 );
 
-$output = array(array(
-    "Id",
-    "Name",
-    "Surname",
-    "Initials",
-    "Age",
-    "DateOfBirth"
-));
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $num_rows = $_REQUEST['rows'];
     $i = 1;
+    $today = new DateTime();
+    $date = new DateTime();
+    $start_date = strtotime("1920-01-01");
     $unique_names = array();
-    // for ($i=1; $i < $num_rows; $i++) { 
-    while ($i <= $num_rows) {
-?>
-        <script>
-            console.log(<?php echo $i ?>);
-        </script>
-<?php
-        $name = $names[array_rand($names)];
-        $initial = $name[0];
-        $surname = $surnames[array_rand($surnames)];
-        $unique_name = $name . $surname;
-        $date = new DateTime();
-        $date->setTimestamp(rand(strtotime("1920-01-01"), time()));
-        $today = new DateTime();
-        $age = date_diff($date, $today);
-        // if (array_key_exists($unique_name, $unique_names)) {
-        //     while (true) {
-        //         $dates  = $unique_names[$unique_name];
-        //         if (in_array($date->format("d/m/Y"), $dates)) {
-        //             $date->setTimestamp(rand(strtotime("1920-01-01"), time()));
-        //         } else {
-        //             $unique_names[$unique_name][] = $date->format("d/m/Y");
-        //             break;
-        //         }
-        //     }
-        //     $temp = array(
-        //         $i,
-        //         $name,
-        //         $surname,
-        //         $initial,
-        //         $age->format('%y'),
-        //         $date->format("d/m/Y")
-        //     );
-        //     $output[] = $temp;
-        // } else {
-        //     $unique_names[$unique_name] = array($date->format("d/m/Y"));
-        //     $temp = array(
-        //         $i,
-        //         $name,
-        //         $surname,
-        //         $initial,
-        //         $age->format('%y'),
-        //         $date->format("d/m/Y")
-        //     );
-        //     $output[] = $temp;
-        // }
-        $temp = array(
-            $i,
-            $name,
-            $surname,
-            $initial,
-            $age->format('%y'),
-            $date->format("d/m/Y")
-        );
-        if (!in_array($temp, $output)) {
-            $output[] = $temp;
-            $i++;
-        }
-    }
+    $unique_dates = array();
     header("Content-type: text/csv;");
     header("Content-Disposition: attachment; filename=output.csv");
+    header("Pragma: no-cache");
+    header("Expires: 0");
     $f = fopen("php://memory", 'w');
-    foreach ($output as $line) {
-        fputcsv($f, $line);
+    fputcsv($f, array(
+        "Id",
+        "Name",
+        "Surname",
+        "Initials",
+        "Age",
+        "DateOfBirth"
+    ));
+    while ($i <= $num_rows) {
+        $name = $names[array_rand($names)];
+        $surname = $surnames[array_rand($surnames)];
+        $unique_name = $name . " " . $surname;
+        $date->setTimestamp(rand($start_date, time()));
+        $age = date_diff($date, $today);
+
+        if (array_key_exists($date->format("d/m/Y"), $unique_dates)) {
+            if (sizeof($unique_dates[$date->format("d/m/Y")]) == 400) {
+                continue;
+            }
+            while (true) {
+                $unique_names = $unique_dates[$date->format("d/m/Y")];
+                if (in_array($unique_name, $unique_names)) {
+                    $name = $names[array_rand($names)];
+                    $surname = $surnames[array_rand($surnames)];
+                    $unique_name = $name . " " . $surname;
+                } else {
+                    $unique_dates[$date->format("d/m/Y")] = array($unique_name);
+                    break;
+                }
+            }
+            $temp = array(
+                $i,
+                $name,
+                $surname,
+                $name[0],
+                $age->format('%y'),
+                $date->format("d/m/Y")
+            );
+            fputcsv($f, $temp);
+            $i++;
+        } else {
+            $unique_dates[$date->format("d/m/Y")] = array($unique_name);
+            $temp = array(
+                $i,
+                $name,
+                $surname,
+                $name[0],
+                $age->format('%y'),
+                $date->format("d/m/Y")
+            );
+            fputcsv($f, $temp);
+            $i++;
+        }
+
     }
     fseek($f, 0);
     fpassthru($f);
