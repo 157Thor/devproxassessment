@@ -1,0 +1,6 @@
+1. Download xampp from apachefriends.org and install
+2. Create a folder in xampp/htdocs to put Test1.php and Test2.php
+    It doesn't matter what you name it.
+3. Start the Apache server and the MySQL server.
+4. Enter in your browser localhost/<filename>/Test1.php where <filename> is the name of the folder you created in step 2
+5. Repeat step 4 for Test2.php
