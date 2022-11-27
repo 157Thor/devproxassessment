@@ -1,5 +1,6 @@
 <?php
 ini_set("memory_limit", "1024M");
+set_time_limit(0);
 
 $servername = "localhost";
 $username = "root";
@@ -102,12 +103,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'generate') {
     while ($i <= $num_rows) {
         $name = $names[array_rand($names)];
         $surname = $surnames[array_rand($surnames)];
-        $unique_name = $name . " " . $surname;
+        $unique_name = $name . $surname;
         $date->setTimestamp(rand($start_date, time()));
         $age = date_diff($date, $today);
 
         if (array_key_exists($date->format("d/m/Y"), $unique_dates)) {
-            if (sizeof($unique_dates[$date->format("d/m/Y")]) == 400) {
+            if (sizeof($unique_dates[$date->format("d/m/Y")]) >= 399) {
                 continue;
             }
             while (true) {
@@ -115,24 +116,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'generate') {
                 if (in_array($unique_name, $unique_names)) {
                     $name = $names[array_rand($names)];
                     $surname = $surnames[array_rand($surnames)];
-                    $unique_name = $name . " " . $surname;
+                    $unique_name = $name . $surname;
                 } else {
-                    $unique_dates[$date->format("d/m/Y")] = array($unique_name);
+                    $unique_dates[$date->format("d/m/Y")][] = $unique_name;
+                    $temp = array(
+                        $i,
+                        $name,
+                        $surname,
+                        $name[0],
+                        $age->format('%y'),
+                        $date->format("d/m/Y")
+                    );
+                    fputcsv($f, $temp);
+                    $i++;
                     break;
                 }
             }
-            $temp = array(
-                $i,
-                $name,
-                $surname,
-                $name[0],
-                $age->format('%y'),
-                $date->format("d/m/Y")
-            );
-            fputcsv($f, $temp);
-            $i++;
         } else {
-            $unique_dates[$date->format("d/m/Y")] = array($unique_name);
+            $unique_dates[$date->format("d/m/Y")][] = $unique_name;
             $temp = array(
                 $i,
                 $name,
@@ -151,7 +152,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'generate') {
     return;
 }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'upload') {
-
+    if (isset($_FILES['file'])) {
+        if ($_FILES['file']['error']) {
+            echo "File error: " . $_FILES['file']['error'] . "<br>";
+        } else {
+            $conn = new mysqli($servername, $username, $password, 'test2DB');
+            $flag = false;
+            $filename = $_FILES['file']['tmp_name'];
+            $f = fopen($filename, 'r');
+            fgetcsv($f, 100);
+            $batchnum = 0;
+            while (!feof($f)) {
+                $sql = "INSERT INTO csv_import VALUES ";
+                while (strlen($sql) < 1000000) {
+                    if (!($line = fgetcsv($f, 1000))) {
+                        break;
+                    }
+                    $sql .= "(
+                        '$line[0]', '$line[1]', '$line[2]', '$line[3]', '$line[4]', STR_TO_DATE('$line[5]', '%d/%m/%Y')
+                    ),";
+                }
+                $sql = rtrim($sql, ',');
+                try {
+                    $result = $conn->query($sql);
+                    $flag = true;
+                } catch (\Throwable $th) {
+                    echo $th . "<br>";
+                    echo $sql;
+                    break;
+                }
+            }
+            if ($flag) {
+                echo "File uploaded successfully!";
+            }else{
+                echo "Error when uploading file.<br>";
+                echo $conn->error;
+            }
+            fclose($f);
+            $conn->close();
+        }
+    } else {
+        echo "No file selected <br>";
+    }
+    
 }
 ?>
 <!DOCTYPE html>
@@ -169,6 +212,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'upload') {
         <input type="hidden" name="action" value="generate">
         <br>
         <button type="submit">Submit</button>
+        <button type="reset">Cancel</button>
+    </form>
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) ?>" method="post" enctype="multipart/form-data">    
+        <label for="file">Upload file: </label>
+        <input type="file" name="file" id="file">
+        <input type="hidden" name="action" value="upload">
+        <br>
+        <button type="submit">Upload</button>
         <button type="reset">Cancel</button>
     </form>
 </body>
