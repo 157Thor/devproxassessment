@@ -184,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'upload') {
             }
             if ($flag) {
                 echo "File uploaded successfully!";
-            }else{
+            } else {
                 echo "Error when uploading file.<br>";
                 echo $conn->error;
             }
@@ -194,7 +194,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'upload') {
     } else {
         echo "No file selected <br>";
     }
-    
 }
 ?>
 <!DOCTYPE html>
@@ -214,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['action'] == 'upload') {
         <button type="submit">Submit</button>
         <button type="reset">Cancel</button>
     </form>
-    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) ?>" method="post" enctype="multipart/form-data">    
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) ?>" method="post" enctype="multipart/form-data">
         <label for="file">Upload file: </label>
         <input type="file" name="file" id="file">
         <input type="hidden" name="action" value="upload">
